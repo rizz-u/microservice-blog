@@ -1,0 +1,63 @@
+services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - JWT_SECRET=supersecret
+    depends_on:
+      - user
+      - post
+      - comment
+    networks:
+      - blognet
+
+  user:
+    build: ./user-service
+    environment:
+      - PORT=3001
+      - MONGO_URL=mongodb://mongo:27017/userdb
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongo
+    networks:
+      - blognet
+
+  post:
+    build: ./post-service
+    environment:
+      - PORT=3002
+      - MONGO_URL=mongodb://mongo:27017/postdb
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongo
+    networks:
+      - blognet
+
+  comment:
+    build: ./comment-service
+    environment:
+      - PORT=3003
+      - MONGO_URL=mongodb://mongo:27017/commentdb
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongo
+    networks:
+      - blognet
+
+  mongo:
+    image: mongo:6.0
+    environment:
+      - MONGO_INITDB_DATABASE=admin
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - blognet
+
+volumes:
+  mongo-data:
+
+networks:
+  blognet:
+    driver: bridge
